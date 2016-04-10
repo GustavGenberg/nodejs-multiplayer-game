@@ -1,4 +1,4 @@
-var config = [], socket, keysDown = {}, canvas, ctx;
+var config = [], socket, keysDown = {}, canvas, ctx, buffer = {};
 config.socket_protocol = 'http';
 config.socket_host = 'localhost';
 config.socket_port = '2222';
@@ -47,16 +47,8 @@ window.onload = function () {
 var bindSockets = function () {
   socket.on('drawingTime', function (data) {
 
-    ctx.clearRect(0, 0, config.map.width, config.map.height);
+    buffer.Players = data.Players;
 
-    for (player in data.Players) {
-      var player = data.Players[player];
-      ctx.beginPath();
-
-      ctx.drawImage(config.Player[1], player.x, player.y);
-
-      ctx.closePath();
-    }
   });
   setInterval(function () {
     socket.emit('keysDown', keysDown);
@@ -86,7 +78,25 @@ var init = function () {
   canvas.id = 'canvas';
   ctx = canvas.getContext('2d');
   $('body').append(canvas);
+  console.log(buffer.Players);
 
 
+  var draw = function () {
+    ctx.clearRect(0, 0, config.map.width, config.map.height);
+    for (each in buffer.Players) {
+      var player = buffer.Players[each];
+      var d;
+      if(player.d == 0) d = 0;
+      if(player.d == 1) d = 1;
+      if(player.d == 2) d = 2;
+      ctx.beginPath();
+
+      ctx.drawImage(config.Player[d], 0, 0, config.Player[1].width, config.Player[1].height, player.x, player.y, 40, 40);
+
+      ctx.closePath();
+    }
+    requestAnimationFrame(draw);
+  };
+  requestAnimationFrame(draw);
 
 };

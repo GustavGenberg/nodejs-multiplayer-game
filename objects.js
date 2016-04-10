@@ -5,6 +5,7 @@ module.exports = {
   intervals: {
     Player: {}
   },
+  cooldown: {},
   Sprites: {
     player: {
       0: '/images/0_player.png',

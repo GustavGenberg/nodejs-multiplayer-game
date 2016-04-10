@@ -49,9 +49,15 @@ var Player = function (id, n, x, y) {
   this.nickname = n;
   this.x = x;
   this.y = y;
+  this.velx = 0;
+  this.vely = y;
   this.keysDown = {};
+  this.speed = config.Player.speed;
+  this.d = 1;
 
   object.intervals.Player[this.id] = [];
+  object.cooldown[this.id] = [];
+  object.cooldown[this.id].Jump = false;
 
   this.init();
 }
@@ -79,25 +85,49 @@ Player.prototype = {
     var _this = this;
     object.intervals.Player[_this.id].Position = setInterval(function () {
       if(_this.keysDown[37] == true) {
-        _this.x--;
-      }
-      if(_this.keysDown[39] == true) {
-        _this.x++;
+        _this.velx = _this.velx - _this.speed;
+        _this.d = 0;
+      } else if(_this.keysDown[39] == true) {
+        _this.velx = _this.velx + _this.speed;
+        _this.d = 2;
+      } else {
+        _this.d = 1;
       }
       if(_this.keysDown[32] == true) {
         _this.Jump();
       }
+      _this.velx *= config.Player.friction;
+      _this.x += _this.velx;
     }, config.Player.interval);
   },
   Jump: function () {
     var _this = this;
-    object.intervals.Player[_this.id].Jump = setInterval(function () {
-      if(_this.y < config.Player.Jump.height) {
-        this_.y = this_.y + config.Player.Jump.speed[0];
-      } else {
-        clearInterval(object.intervals.Player[_this.id].Jump);
-      }
-    }, config.Player.interval);
+    if(object.cooldown[_this.id].Jump == false) {
+      object.cooldown[_this.id].Jump = true;
+
+      object.intervals.Player[_this.id].Jump = setInterval(function () {
+        if(_this.y > config.map.height - config.Player.Jump.height) {
+          _this.y = _this.y - config.Player.Jump[0];
+        } else {
+          clearInterval(object.intervals.Player[_this.id].Jump);
+
+          setTimeout(function () {
+            object.intervals.Player[_this.id].JumpDown = setInterval(function () {
+              if(_this.y <= config.map.height - config.Player.height) {
+                _this.y = _this.y + config.Player.Jump[1];
+              } else {
+                clearInterval(object.intervals.Player[_this.id].JumpDown);
+              }
+            }, config.Player.interval);
+          }, 10);
+
+        }
+      }, config.Player.interval);
+
+      setTimeout(function () {
+        object.cooldown[_this.id].Jump = false;
+      }, config.Player.Jump.cooldown);
+    }
   },
   Remove: function () {
     var _this = this;
