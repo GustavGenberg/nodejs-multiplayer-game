@@ -11,7 +11,6 @@ module.exports = {
     console.log('Cleared map cache');
   },
   get: function (a) {
-    console.log('Got ' + a + ' from map cache');
     return this.cache[a];
   }
 }

@@ -17,8 +17,9 @@ body {
 
 canvas {
   position: fixed;
-  top: calc(50% - 250px);
+  top: calc(50% - 200px);
   left: calc(50% - 300px);
+  background-color: rgb(89, 181, 221);
 }
 
 ::-webkit-scrollbar {

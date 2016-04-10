@@ -8,19 +8,19 @@ module.exports = {
   map: {
     fps: 120,
     width: 600,
-    height: 500
+    height: 400
   },
   Player: {
     interval: 1,
     Jump: {
-      0: 0.4,
-      1: 0.3,
+      0: 0.7,
+      1: 0.2,
       height: 150,
       cooldown: 900
     },
     width: 40,
     height: 40,
-    speed: 0.02,
+    speed: 0.015,
     friction: 0.975
   }
 };

@@ -14,9 +14,6 @@ app.listen(config.express.port, function () {
 
 
 mapHandler.load('map_1');
-console.log(mapHandler.get('map_1'));
-mapHandler.clear();
-console.log(mapHandler.cache);
 
 var generateRandomID = function () {
   var c;
@@ -39,7 +36,8 @@ io.on('connection', function (socket) {
   var ID = generateRandomID();
   object.Sockets[ID] = socket;
   object.Sockets[ID].emit('config', {Sprites: object.Sprites, map: config.map});
-  object.Players[ID] = new Player (ID, 'Unnamed', (config.map.width / 2) - (config.Player.width / 2), config.map.height - config.Player.height);
+  object.Sockets[ID].emit('mapDATA', mapHandler.get('map_1'));
+  object.Players[ID] = new Player (ID, 'Unnamed', mapHandler.get('map_1').player.x, mapHandler.get('map_1').player.y);
 
   Game.Start();
 });
@@ -54,6 +52,9 @@ var Player = function (id, n, x, y) {
   this.keysDown = {};
   this.speed = config.Player.speed;
   this.d = 1;
+  this.viewport = {};
+  this.viewport.x = 0;
+  this.viewport.y = 0;
 
   object.intervals.Player[this.id] = [];
   object.cooldown[this.id] = [];
@@ -85,19 +86,33 @@ Player.prototype = {
     var _this = this;
     object.intervals.Player[_this.id].Position = setInterval(function () {
       if(_this.keysDown[37] == true) {
-        _this.velx = _this.velx - _this.speed;
-        _this.d = 0;
+        if(_this.x > 0) {
+          _this.velx = _this.velx - _this.speed;
+          _this.d = 0;
+        }
       } else if(_this.keysDown[39] == true) {
-        _this.velx = _this.velx + _this.speed;
-        _this.d = 2;
+        if(_this.x < mapHandler.get('map_1').width - config.Player.width) {
+          _this.velx = _this.velx + _this.speed;
+          _this.d = 2;
+        }
       } else {
         _this.d = 1;
       }
       if(_this.keysDown[32] == true) {
         _this.Jump();
       }
+
+      if(_this.x <= 0) {
+        _this.x = 0;
+        _this.d = 1;
+      }
+      if(_this.x >= mapHandler.get('map_1').width - config.Player.width) {
+        _this.x = mapHandler.get('map_1').width - config.Player.width;
+        _this.d = 1;
+      }
       _this.velx *= config.Player.friction;
       _this.x += _this.velx;
+      _this.viewport.x = _this.x;
     }, config.Player.interval);
   },
   Jump: function () {
